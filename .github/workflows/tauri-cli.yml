@@ -1,0 +1,43 @@
+name: Build and Publish Tauri CLI
+
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to use for release'     
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Publish and Publish Tauri CLI for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: cargo-tauri
+            asset_name: tauri-cli_linux
+          - os: windows-latest
+            artifact_name: cargo-tauri.exe
+            asset_name: tauri-cli_windows.exe
+          - os: macos-latest
+            artifact_name: cargo-tauri
+            asset_name: tauri-cli_macos
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: 'tauri-apps/tauri'
+      - name: Build
+        run: cd cli/core && cargo build --release
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./cli/core/target/release/${{ matrix.artifact_name }}
+          tag: tauri-cli-${{ github.event.inputs.version }}
+          asset_name: ${{ matrix.asset_name }}
+          release_name: Tauri CLI ${{ github.event.inputs.version }}
