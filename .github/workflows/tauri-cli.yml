@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             artifact_name: cargo-tauri
             asset_name: tauri-cli_linux
           - os: windows-latest
